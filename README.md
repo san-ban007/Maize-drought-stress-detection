@@ -6,6 +6,8 @@ A comprehensive computer vision pipeline for detecting and analyzing drought str
 
 This repository contains tools and workflows for automated detection of drought stress in maize plants through image analysis. The system processes side-view camera images of maize plants taken over multiple days, segments individual plant components (Yellow Early Leaf - YEL, and stem), and analyzes pixel intensity distributions to identify stress patterns.
 
+**Dataset**: The complete dataset used in this work is publicly available and can be downloaded from [Zenodo](https://zenodo.org/records/10991581).
+
 ## Key Features
 
 - **Automated Image Preprocessing**: Normalization, session division, and patch extraction
@@ -187,7 +189,21 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 
 ## Citation
 
-If you use this code in your research, please cite the associated paper(s).
+If you use this code or dataset in your research, please cite the associated paper:
+
+**Journal Paper**: [Add journal citation and DOI here]
+
+**Dataset**: 
+```bibtex
+@dataset{maize_drought_dataset,
+  author       = {[Authors]},
+  title        = {Maize Drought Stress Detection Dataset},
+  year         = {2024},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.10991581},
+  url          = {https://zenodo.org/records/10991581}
+}
+```
 
 ## License
 
