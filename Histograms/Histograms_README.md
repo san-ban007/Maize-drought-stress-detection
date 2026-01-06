@@ -20,12 +20,7 @@ Plant stress manifests as color changes:
 - **Chlorosis**: Yellowing due to chlorophyll degradation
 - **Necrosis**: Browning/darkening of dead tissue
 - **Wilting**: Changes in tissue reflectance
-
 These physiological changes alter pixel intensity distributions:
-```
-Well-watered:   [Strong peak in green region]
-Drought-stressed: [Shifted toward yellow/brown, broader distribution]
-```
 
 ### Earth Mover's Distance (EMD)
 Also known as Wasserstein distance, EMD measures the minimum "work" required to transform one distribution into another:
@@ -76,13 +71,6 @@ range = (0, 255)  # Full intensity range
 density = True  # Normalize to probability distribution
 ```
 
-**Channel Analysis**:
-Can analyze individual or combined channels:
-- **Blue channel**: Least affected by chlorophyll
-- **Green channel**: Most sensitive to chlorosis
-- **Red/NIR channel**: Useful for stress detection
-- **Combined RGB**: Overall color information
-
 **Output Structure**:
 ```
 Histograms/
@@ -111,15 +99,6 @@ y20m10d01,Plant2,1,132.1,28.9,-0.2,2.4,135,115,152
 ### `Plot_histograms_of_well_watered_and_drought_stressed_in_one_image.ipynb`
 **Purpose**: Create comprehensive visualizations comparing drought vs. control throughout trial
 
-**Visualization Types**:
-
-#### 1. Combined Histogram Plot
-```
-[Day 1]  [Day 2]  [Day 3]  ...  [Day N]
- Ctrl     Ctrl     Ctrl          Ctrl    (Plant 1/3 overlaid)
- Drght    Drght    Drght         Drght   (Plant 2/4 overlaid)
-```
-
 Features:
 - Side-by-side comparison per day
 - Overlaid well-watered (blue) and drought (red)
@@ -138,34 +117,6 @@ plt.plot(days, drought_means, 'r-', label='Drought')
 # Etc.
 ```
 
-#### 3. Distribution Evolution Animation
-Optional: Create GIF showing day-by-day histogram changes
-
-**Key Insights from Visualizations**:
-- **Separation timing**: When do distributions diverge?
-- **Magnitude of shift**: How much do histograms differ?
-- **Recovery patterns**: If rewatered, how quickly do distributions normalize?
-- **Consistency**: Do both drought plants show similar patterns?
-
-**Plot Configuration**:
-```python
-# Styling
-figsize = (20, 12)  # Large enough for all days
-dpi = 300  # High resolution
-colors = {
-    'control': '#2E86AB',      # Blue
-    'drought': '#A23B72',      # Red
-    'control_std': '#A7C4D6',  # Light blue
-    'drought_std': '#E6B8D1'   # Light red
-}
-
-# Layout
-subplot_rows = 2
-subplot_cols = len(dates) // 2
-sharex = True
-sharey = True
-```
-
 **Output**:
 ```
 Comparison_Plots/
@@ -175,7 +126,6 @@ Comparison_Plots/
 └── Trial005_statistics_table.pdf
 ```
 
----
 
 ### `EMD.ipynb`
 **Purpose**: Calculate Earth Mover's Distance between drought and control histograms
@@ -230,38 +180,6 @@ plt.ylabel('EMD (intensity units)')
 plt.title('Earth Mover\'s Distance: Drought vs. Control')
 ```
 
-**Interpretation**:
-- **Low EMD (< 5)**: Distributions very similar (early stage or recovery)
-- **Medium EMD (5-15)**: Moderate stress visible
-- **High EMD (> 15)**: Severe stress, clearly separated distributions
-- **Increasing trend**: Progressive stress development
-- **Decreasing trend**: Recovery or acclimation
-
-**Channel-Specific EMD**:
-```python
-emd_blue = wasserstein_distance(control_blue, drought_blue)
-emd_green = wasserstein_distance(control_green, drought_green)
-emd_red = wasserstein_distance(control_red, drought_red)
-
-# Most sensitive channel?
-most_sensitive = max(emd_blue, emd_green, emd_red)
-```
-
-**Statistical Testing**:
-```python
-# Bootstrap confidence intervals
-bootstrap_emds = []
-for _ in range(1000):
-    # Resample pixels
-    control_sample = resample(control_pixels)
-    drought_sample = resample(drought_pixels)
-    emd = wasserstein_distance(control_sample, drought_sample)
-    bootstrap_emds.append(emd)
-
-ci_lower = np.percentile(bootstrap_emds, 2.5)
-ci_upper = np.percentile(bootstrap_emds, 97.5)
-```
-
 **Output**:
 ```
 EMD_Results/
@@ -299,37 +217,7 @@ pip install pillow
 pip install statsmodels
 ```
 
-## Configuration
 
-### Input Paths
-```python
-# Histograms_per_day.ipynb
-trial_num = '005'
-root_path = '/path/to/Trial005/Patches'
-scan = '1'  # 1=morning, 2=evening
-tissue_type = 'YEL'  # or 'STEM'
-```
-
-### Histogram Parameters
-```python
-bins = 256
-range = (0, 255)
-density = True  # Normalize histograms
-alpha = 0.6  # Transparency for overlays
-```
-
-### Color Channels
-```python
-# Analyze specific channels
-channels = {
-    'blue': 0,
-    'green': 1,
-    'red': 2
-}
-
-# Or combined
-use_grayscale = False
-```
 
 ## Usage
 
@@ -370,289 +258,5 @@ jupyter notebook EMD.ipynb
 4. Perform statistical tests
 5. Generate visualizations
 ```
+ 
 
-## Output Interpretation
-
-### Histogram Shapes
-
-**Normal (Well-watered)**:
-```
-   ^
-   |     ***
-   |   ******
-   |  ********
-   | **********
-   |************
-   +-------------> Intensity
-   Low    High
-```
-- Single peak (unimodal)
-- Peak in green region (120-160)
-- Narrow spread
-- Symmetric or slight negative skew
-
-**Drought-Stressed**:
-```
-   ^
-   |   ***
-   |  *****    **
-   | ******* ****
-   |*************
-   +-------------> Intensity
-   Low    High
-```
-- Broader distribution
-- Peak shifted left (lower intensity)
-- Possible bimodal (healthy + stressed tissue)
-- Positive skew (tail toward higher values)
-
-### Statistical Significance
-
-**Mean Decrease**:
-- Control: μ ≈ 145
-- Drought: μ ≈ 125
-- Indicates darker pixels (less chlorophyll)
-
-**Increased Variability**:
-- Control: σ ≈ 20
-- Drought: σ ≈ 35
-- More heterogeneous tissue condition
-
-**Skewness Changes**:
-- Control: skew ≈ -0.3 (slight left tail)
-- Drought: skew ≈ +0.5 (right tail from necrosis)
-
-### EMD Thresholds
-
-Based on empirical observations:
-- **0-5**: No significant stress
-- **5-10**: Early/mild stress
-- **10-20**: Moderate stress
-- **20+**: Severe stress
-
-## Advanced Analysis
-
-### Multi-Channel Integration
-```python
-# Weighted EMD across channels
-weights = {
-    'blue': 0.2,
-    'green': 0.5,  # Most informative
-    'red': 0.3
-}
-
-combined_emd = (
-    weights['blue'] * emd_blue +
-    weights['green'] * emd_green +
-    weights['red'] * emd_red
-)
-```
-
-### Temporal Smoothing
-```python
-from scipy.signal import savgol_filter
-
-# Smooth EMD trends
-window_length = 5
-polyorder = 2
-smoothed_emd = savgol_filter(emd_values, window_length, polyorder)
-```
-
-### Hypothesis Testing
-```python
-from scipy.stats import mannwhitneyu
-
-# Test if control and drought distributions differ
-stat, pvalue = mannwhitneyu(
-    control_pixels,
-    drought_pixels,
-    alternative='two-sided'
-)
-
-print(f"U-statistic: {stat}")
-print(f"p-value: {pvalue}")
-# Significant if p < 0.05
-```
-
-### Correlation Analysis
-```python
-import pandas as pd
-
-# Correlate EMD with plant measurements
-df = pd.DataFrame({
-    'EMD': emd_values,
-    'Plant_Height': height_measurements,
-    'Soil_Moisture': moisture_readings,
-    'Temperature': temp_data
-})
-
-correlations = df.corr()
-```
-
-### Machine Learning Classification
-```python
-from sklearn.ensemble import RandomForestClassifier
-
-# Features from histograms
-features = np.column_stack([
-    means, stds, skewnesses, kurtoses, emds
-])
-labels = [0]*len(control) + [1]*len(drought)
-
-clf = RandomForestClassifier()
-clf.fit(features, labels)
-accuracy = clf.score(test_features, test_labels)
-```
-
-## Validation
-
-### Cross-Trial Validation
-```python
-# Train on Trial 005, test on Trial 008
-train_features = extract_features(trial_005)
-test_features = extract_features(trial_008)
-
-model.fit(train_features, train_labels)
-test_accuracy = model.score(test_features, test_labels)
-```
-
-### Temporal Consistency
-```python
-# Check if patterns repeat across trials
-for trial in [005, 006, 007, 008]:
-    emd_trend = calculate_emd_trend(trial)
-    peak_stress_day = np.argmax(emd_trend)
-    print(f"Trial {trial}: Peak stress on Day {peak_stress_day}")
-```
-
-## Troubleshooting
-
-### Issue: Histograms Look Similar
-**Possible Causes**:
-- Too early in stress progression
-- Insufficient drought severity
-- Segmentation includes background
-- Wrong color channel analyzed
-
-**Solutions**:
-- Analyze later time points
-- Check experimental protocol
-- Improve segmentation
-- Try green channel specifically
-
-### Issue: EMD Values Unreasonably High/Low
-**Possible Causes**:
-- Normalization issues
-- Incorrect bin edges
-- Mixed tissue types
-
-**Solutions**:
-- Verify histogram normalization
-- Use consistent bin ranges
-- Separate YEL and stem analysis
-
-### Issue: Large Variance Across Replicates
-**Possible Causes**:
-- Plant-to-plant variation
-- Imaging inconsistencies
-- Segmentation errors
-
-**Solutions**:
-- Use median instead of mean
-- Apply stricter quality control
-- Increase sample size
-
-## Performance Optimization
-
-### Memory Efficiency
-```python
-# Process images in batches
-def process_in_batches(image_paths, batch_size=100):
-    histograms = []
-    for i in range(0, len(image_paths), batch_size):
-        batch = image_paths[i:i+batch_size]
-        hist = compute_batch_histogram(batch)
-        histograms.append(hist)
-    return np.sum(histograms, axis=0)
-```
-
-### Parallel Processing
-```python
-from multiprocessing import Pool
-
-def compute_histogram_parallel(image_paths, n_cores=4):
-    with Pool(n_cores) as p:
-        histograms = p.map(compute_single_histogram, image_paths)
-    return np.sum(histograms, axis=0)
-```
-
-## Integration with Pipeline
-
-**Input Sources**:
-- Segmented images from `Labelbox_Detectron2/`
-- Preprocessed images from `Preprocessing/`
-
-**Complementary Analysis**:
-- Histogram analysis provides quantitative stress metrics
-- Vision Transformers provide classification accuracy
-- Combined approach increases confidence
-
-**Workflow Integration**:
-```
-Detectron2 Segmentation
-         ↓
-    Histogram Analysis ← → Vision Transformer
-         ↓                        ↓
-    EMD Metrics            Attention Maps
-         ↓                        ↓
-         └─── Combined Report ────┘
-```
-
-## Biological Validation
-
-### Expected Patterns
-
-**Drought Initiation** (Days 1-3):
-- Minimal histogram changes
-- EMD < 5
-
-**Visible Stress** (Days 4-7):
-- Histogram separation begins
-- EMD 5-15
-- Mean intensity decreases
-
-**Severe Stress** (Days 8+):
-- Clear histogram separation
-- EMD > 15
-- Increased variability
-
-### Physiological Correlation
-- **Chlorophyll loss**: Green channel shift to lower values
-- **Anthocyanin accumulation**: Red channel increase
-- **Tissue death**: Bimodal distributions
-
-## Citation
-
-If using EMD for plant stress analysis:
-```bibtex
-@article{rubner2000emd,
-  title={The earth mover's distance as a metric for image retrieval},
-  author={Rubner, Yossi and Tomasi, Carlo and Guibas, Leonidas J},
-  journal={International journal of computer vision},
-  volume={40},
-  number={2},
-  pages={99--121},
-  year={2000}
-}
-```
-
-## References
-
-- [SciPy wasserstein_distance Documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.wasserstein_distance.html)
-- [Earth Mover's Distance Tutorial](https://en.wikipedia.org/wiki/Earth_mover%27s_distance)
-
-## Related Documentation
-
-- Main README: `../README.md`
-- Vision Transformer: `../VisionTransformer/README.md`
-- Object Detection: `../Labelbox_Detectron2/README.md`
