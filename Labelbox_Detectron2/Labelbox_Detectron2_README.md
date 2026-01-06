@@ -328,32 +328,7 @@ Where:
 - Clean separation of YEL or Stem
 - Ready for downstream analysis (histograms, classification)
 
-## Quality Assurance
 
-### Visual Inspection
-1. Check bounding box visualizations for accuracy
-2. Verify segmentation removes background properly
-3. Ensure color thresholds don't exclude valid tissue
-4. Look for missed detections (empty predictions)
-
-### Common Issues
-
-**Issue**: Low confidence scores
-- **Solution**: Collect more training annotations
-- **Solution**: Adjust `cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST`
-
-**Issue**: Missing detections
-- **Solution**: Check if YEL/Stem visible in original image
-- **Solution**: Review color segmentation thresholds
-- **Solution**: Retrain with more diverse examples
-
-**Issue**: Over-segmentation
-- **Solution**: Increase confidence threshold
-- **Solution**: Apply non-maximum suppression
-
-**Issue**: Color segmentation too aggressive
-- **Solution**: Adjust HSV thresholds in `color_segmentation()`
-- **Solution**: Test on range of lighting conditions
 
 ## Performance Optimization
 
@@ -371,41 +346,6 @@ The current implementation processes images sequentially. For large datasets, co
 - Multi-GPU training with `DistributedDataParallel`
 - Batch inference for predictions
 - Multi-threaded image I/O
-
-## Troubleshooting
-
-### CUDA Out of Memory
-- Reduce `cfg.SOLVER.IMS_PER_BATCH`
-- Reduce `cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE`
-- Use smaller backbone (R-50 instead of R-101)
-
-### Import Errors
-```bash
-# Ensure detectron2 installed correctly
-pip show detectron2
-
-# Check CUDA compatibility
-python -c "import torch; print(torch.cuda.is_available())"
-```
-
-### Poor Segmentation Results
-- Review HSV color space thresholds
-- Check original image quality
-- Verify bounding boxes are accurate
-- Consider alternative color spaces (LAB, YCrCb)
-
-## Advanced Usage
-
-### Custom Color Segmentation
-Modify thresholds in `Predictions_Extract.py`:
-```python
-# Original
-lower_mask = im[:,:,0] > 0.5
-upper_mask = im[:,:,0] < 0.9
-
-# For different lighting conditions
-lower_mask = im[:,:,0] > 0.4  # More inclusive
-upper_mask = im[:,:,0] < 0.95
 
 
 ## Integration with Pipeline
