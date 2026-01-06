@@ -18,7 +18,7 @@ The approach leverages transfer learning from ImageNet-pretrained ViT models, ad
 - **Class 1**: Drought-stressed - Plants 2 and 4
 
 **Input Data**: Segmented plant images from `Labelbox_Detectron2/`
-- YEL (Young Early Leaf) images
+- YEL (Youngest Expanding Leaf) images
 - Stem images
 - Full plant patches
 
@@ -106,13 +106,6 @@ weight_decay = 0.01
 patience = 5  # Early stopping
 ```
 
-**Expected Performance**:
-- Training Accuracy: 85-95%
-- Validation Accuracy: 80-90%
-- Test Accuracy: 75-85% (depending on trial variability)
-
----
-
 ### `Vision_Transformer_attn_map.ipynb`
 **Purpose**: Visualize attention maps to interpret model decision-making
 
@@ -180,64 +173,6 @@ Vision Transformers use multi-head self-attention to:
 - Applies colormap (e.g., 'jet', 'viridis')
 - Overlays on original image with transparency
 
-**Biological Insights**:
-- Model focuses on **leaf tips** for stress indicators
-- Attention to **leaf margins** (wilting/curling)
-- Emphasis on **color variations** (chlorosis)
-- Lower attention to **stems** and **background**
-
-**Example Output**:
-```
-Original Image | Attention Map | Overlay
-[Plant Image]  | [Heatmap]     | [Combined]
-
-Key Findings:
-- High attention on YEL (drought-sensitive)
-- Focus on discolored leaf regions
-- Minimal attention to soil/pot
-```
-
----
-
-## Dataset Organization
-
-### Directory Structure
-```
-Dataset/
-├── train/
-│   ├── drought/
-│   │   ├── Plant2_y20m10d01_0001.jpg
-│   │   ├── Plant2_y20m10d02_0001.jpg
-│   │   └── Plant4_...
-│   └── well_watered/
-│       ├── Plant1_y20m10d01_0001.jpg
-│       ├── Plant3_y20m10d02_0001.jpg
-│       └── ...
-├── val/
-│   ├── drought/
-│   └── well_watered/
-└── test/
-    ├── drought/
-    └── well_watered/
-```
-
-### Data Split Strategy
-```python
-# Temporal split (recommended)
-Train: Days 1-10
-Val:   Days 11-13
-Test:  Days 14-17
-
-# Plant-wise split (alternative)
-Train: Plants 1,2
-Val:   Plant 3
-Test:  Plant 4
-```
-
-### Class Balance
-- Ensure equal drought/well-watered samples
-- Use weighted loss if imbalanced
-- Apply oversampling/undersampling if needed
 
 ## Model Variants
 
@@ -345,13 +280,6 @@ jupyter notebook Vision_Transformer_FineTuning.ipynb
 7. Save model weights
 ```
 
-**Training Tips**:
-- Start with frozen backbone, unfreeze gradually
-- Monitor validation loss for overfitting
-- Use learning rate warmup (first few epochs)
-- Save checkpoints every epoch
-- Log to TensorBoard for visualization
-
 ### Attention Visualization
 ```bash
 # Open notebook
@@ -363,200 +291,6 @@ jupyter notebook Vision_Transformer_attn_map.ipynb
 3. Extract attention weights
 4. Generate attention maps
 5. Create visualizations
-6. Interpret results
-```
-
-## Output
-
-### Model Checkpoints
-```
-models/
-├── vit_drought_epoch_10.pth
-├── vit_drought_epoch_15.pth
-├── vit_drought_best.pth          # Best validation accuracy
-└── vit_drought_final.pth
-```
-
-### Training Logs
-```
-logs/
-├── training_loss.csv
-├── validation_metrics.csv
-├── confusion_matrix.png
-└── roc_curve.png
-```
-
-### Attention Maps
-```
-attention_maps/
-├── drought_plant2_day10.png
-├── drought_plant4_day12.png
-├── control_plant1_day10.png
-└── control_plant3_day12.png
-```
-
-## Performance Analysis
-
-### Evaluation Metrics
-
-**Confusion Matrix**:
-```
-                Predicted
-                Drought | Well-watered
-Actual Drought     TP   |     FN
-     Well-watered  FP   |     TN
-```
-
-**Metrics**:
-- Accuracy = (TP + TN) / Total
-- Precision = TP / (TP + FP)
-- Recall = TP / (TP + FN)
-- F1-Score = 2 × (Precision × Recall) / (Precision + Recall)
-
-### Cross-Validation
-```python
-# K-Fold on different trials
-for trial in [005, 006, 007, 008]:
-    train_on_other_trials()
-    test_on_current_trial()
-    record_metrics()
-```
-
-### Error Analysis
-Common misclassifications:
-1. Early drought stages (subtle symptoms)
-2. Recovery phase (after rewatering)
-3. Natural leaf variations
-4. Lighting/shadow effects
-
-## Optimization Strategies
-
-### Data Augmentation
-```python
-transforms.Compose([
-    transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomRotation(15),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2),
-    transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
-    # ... normalization
-])
-```
-
-### Regularization Techniques
-- Dropout in classification head
-- Weight decay (L2 regularization)
-- Stochastic depth (layer dropping)
-- Mixup or CutMix augmentation
-
-### Transfer Learning Strategies
-
-**Strategy 1: Feature Extraction**
-```python
-# Freeze all layers except classifier
-for param in model.vit.parameters():
-    param.requires_grad = False
-# Only train classifier
-```
-
-**Strategy 2: Fine-tuning**
-```python
-# Unfreeze all layers
-for param in model.parameters():
-    param.requires_grad = True
-# Use lower learning rate
-```
-
-**Strategy 3: Gradual Unfreezing**
-```python
-# Epochs 1-5: Only classifier
-# Epochs 6-10: Last 4 transformer blocks
-# Epochs 11+: All layers
-```
-
-## Interpretability
-
-### Attention Pattern Analysis
-
-**Drought-Stressed Plants**:
-- High attention on leaf tips (wilting)
-- Focus on discolored regions (chlorosis)
-- Emphasis on leaf margins (curling)
-
-**Well-Watered Plants**:
-- Broader attention distribution
-- Focus on overall plant structure
-- Less emphasis on specific stress indicators
-
-### Gradient-Based Methods
-Supplement attention maps with:
-- Grad-CAM
-- Integrated Gradients
-- Saliency Maps
-
-## Troubleshooting
-
-### Low Accuracy
-- **Insufficient Data**: Collect more labeled examples
-- **Class Imbalance**: Apply weighted loss or resampling
-- **Poor Augmentation**: Review augmentation strategies
-- **Learning Rate**: Try lower/higher values
-
-### Overfitting
-- Increase dropout rate
-- Add more augmentation
-- Reduce model capacity (use ViT-Base instead of ViT-Large)
-- Implement early stopping
-
-### Attention Maps Not Informative
-- Check if model is actually trained (not random)
-- Try different attention aggregation methods
-- Visualize multiple layers separately
-- Compare with baseline (random model)
-
-### GPU Memory Issues
-```python
-# Reduce batch size
-batch_size = 8  # instead of 16
-
-# Use gradient accumulation
-accumulation_steps = 2
-# Effective batch size = 8 * 2 = 16
-
-# Mixed precision training
-from torch.cuda.amp import autocast, GradScaler
-scaler = GradScaler()
-```
-
-## Advanced Techniques
-
-### Ensemble Methods
-```python
-# Train multiple models
-models = [vit_base, vit_large, resnet50]
-
-# Average predictions
-predictions = [model(image) for model in models]
-final_pred = torch.mean(torch.stack(predictions), dim=0)
-```
-
-### Multi-Task Learning
-```python
-# Simultaneous classification tasks
-tasks = {
-    'drought_stress': 2 classes,
-    'growth_stage': 4 classes,
-    'plant_health': 3 classes
-}
-# Share backbone, separate heads
-```
-
-### Temporal Modeling
-```python
-# Sequence of images over time
-# Use LSTM or Transformer on ViT features
-sequence = [day1_features, day2_features, ..., dayN_features]
-temporal_model = LSTM(input_features, hidden_dim)
 ```
 
 ## Integration with Pipeline
@@ -569,31 +303,3 @@ Pipeline flow:
 Preprocessing → Detectron2 → VisionTransformer
                            ↘ Histograms
 ```
-
-**Complementary Analysis**:
-- ViT classifications validate histogram-based stress detection
-- Attention maps identify which features histograms should focus on
-- Combined approach increases robustness
-
-## Citation
-
-```bibtex
-@article{dosovitskiy2020vit,
-  title={An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale},
-  author={Dosovitskiy, Alexey and Beyer, Lucas and Kolesnikov, Alexander and others},
-  journal={ICLR},
-  year={2021}
-}
-```
-
-## References
-
-- [Vision Transformer Paper](https://arxiv.org/abs/2010.11929)
-- [HuggingFace Transformers](https://huggingface.co/docs/transformers/)
-- [Attention Visualization Tutorial](https://jacobgil.github.io/deeplearning/vision-transformer-explainability)
-
-## Related Documentation
-
-- Main README: `../README.md`
-- Object Detection: `../Labelbox_Detectron2/README.md`
-- Histogram Analysis: `../Histograms/README.md`
