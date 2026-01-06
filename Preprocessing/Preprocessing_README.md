@@ -184,13 +184,12 @@ Follow this sequence for complete preprocessing:
 
 ## Dependencies
 
-```python
-import os
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-import shutil
-from sklearn.feature_extraction import image
-import pandas as pd
-import glob
-```
+os
+cv2
+numpy
+matplotlib
+shutil
+sklearn
+pandas
+glob
+
