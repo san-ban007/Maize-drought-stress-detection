@@ -4,7 +4,7 @@ This folder contains scripts and notebooks for preprocessing raw maize plant ima
 
 ## Overview
 
-Raw images from side-view cameras require several preprocessing steps to:
+Raw images collected from raspberry pi cameras require several preprocessing steps to:
 - Organize images by scanning session (morning/evening)
 - Normalize lighting and color variations
 - Extract individual plant patches from group images
@@ -96,7 +96,7 @@ Images are expected to have timestamps embedded at character positions 15:23
 **Purpose**: Utility script for removing unwanted or corrupted images
 
 **Use Cases**:
-- Remove corrupted files (e.g., Thumbs.db)
+- Remove corrupted files
 - Filter out test images
 - Clean up failed processing outputs
 
@@ -194,125 +194,3 @@ from sklearn.feature_extraction import image
 import pandas as pd
 import glob
 ```
-
-## Configuration
-
-### Path Configuration
-Update these paths in each script:
-```python
-# Session_divide.py
-src_path = 'D:/Plant Water Stress/Data/Trial_005/Trial005/'
-
-# ImageNormalization.py
-root = 'D:/Plant Water Stress/Data/Trial_005/Trial005'
-src = "D:/Plant Water Stress/Data/Trial_005/Sessions/"
-toDirectory = "D:/Plant Water Stress/Data/Trial_005/NormalizedImages/"
-```
-
-### Trial Selection
-```python
-trial_num = '005'  # Change to your trial number
-```
-
-## Input Requirements
-
-### Image Format
-- File type: JPEG or similar formats
-- Color space: RGB or RGB + NIR
-- Naming convention: Must include timestamp in consistent format
-- Expected dimensions: High-resolution plant images
-
-### Directory Structure
-Raw data should be organized:
-```
-Trial_XXX/
-├── TrialXXX/
-│   ├── y20m09d27/
-│   │   ├── image_timestamp1.jpg
-│   │   ├── image_timestamp2.jpg
-│   │   └── ...
-```
-
-## Output
-
-### Normalized Images
-- Format: JPEG
-- Channels: Normalized to [0, 255]
-- Preserves: Original image dimensions and color depth
-
-### Patches
-- Individual plant images
-- Consistent framing across days
-- Ready for model input
-
-### Logs
-- Session counts
-- File processing confirmations
-- Error messages for corrupted files
-
-## Quality Control
-
-### Verification Steps
-1. Check image counts per session (should be consistent)
-2. Visually inspect normalized images for artifacts
-3. Verify patch boundaries align with plant positions
-4. Confirm blackout masks don't obscure plant-of-interest
-
-### Common Issues
-
-**Issue**: Inconsistent session counts
-- **Solution**: Check for missing image files or timestamp parsing errors
-
-**Issue**: Over/under-normalization
-- **Solution**: Verify min/max calculations are per-session, not per-image
-
-**Issue**: Poor patch extraction
-- **Solution**: Adjust bounding box coordinates in CutImages.ipynb
-
-**Issue**: Insufficient blackout masking
-- **Solution**: Iteratively add more blackout regions in Blackout.ipynb
-
-## Performance Considerations
-
-- Normalization processes entire sessions to maintain consistency
-- Patch extraction is semi-automatic but requires initial user input
-- Blackout masking may need adjustment per plant/trial
-- Processing time scales linearly with image count
-
-## Tips for Best Results
-
-1. **Consistent Lighting**: Normalization works best with relatively consistent lighting
-2. **Careful Patch Boundaries**: Take time to accurately define plant boundaries
-3. **Complete Blackout**: Ensure no adjacent plant pixels remain visible
-4. **Validation**: Always visually check outputs before proceeding to next stage
-
-## Troubleshooting
-
-### Script Fails to Find Images
-- Verify path separators (use `os.path.join()`)
-- Check trial_num matches directory name
-- Ensure timestamp parsing matches your filename format
-
-### Normalization Creates Artifacts
-- Check for corrupted input images
-- Verify channel ordering (BGR vs RGB)
-- Ensure sufficient bit depth in input images
-
-### Patches Miss Plant Regions
-- Review bounding box coordinates
-- Check for plant movement between sessions
-- Consider plant growth over trial duration
-
-## Next Steps
-
-After preprocessing, images are ready for:
-- Object detection (Labelbox_Detectron2)
-- Segmentation tasks
-- Classification with Vision Transformers
-- Histogram analysis
-
-## Related Documentation
-
-- Main README: `../README.md`
-- Object Detection: `../Labelbox_Detectron2/README.md`
-- Analysis: `../Histograms/README.md`
