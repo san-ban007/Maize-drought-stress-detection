@@ -1,10 +1,10 @@
 # Maize Drought Stress Detection
 
-A comprehensive computer vision pipeline for detecting and analyzing drought stress in maize plants using hyperspectral imaging, deep learning, and histogram analysis techniques.
+A computer vision pipeline for detecting and analyzing drought stress in maize plants using Near Infrared (NIR) imaging, deep learning, and histogram analysis techniques.
 
 ## Overview
 
-This repository contains tools and workflows for automated detection of drought stress in maize plants through image analysis. The system processes side-view camera images of maize plants taken over multiple days, segments individual plant components (Yellow Early Leaf - YEL, and stem), and analyzes pixel intensity distributions to identify stress patterns.
+This repository contains tools and workflows for automated detection of drought stress in maize plants through image analysis. The system processes raspberry pi camera images of maize plants taken over multiple days, segments individual plant components (Youngest Expanding Leaf - YEL, and stem), and analyzes pixel intensity distributions to identify stress patterns.
 
 **Dataset**: The complete dataset used in this work is publicly available and can be downloaded from [Zenodo](https://zenodo.org/records/10991581).
 
@@ -33,8 +33,7 @@ The project processes data from greenhouse trials where:
 - Plants 2 and 4 are subjected to drought stress
 - Plants 1 and 3 serve as well-watered controls
 - Images are captured twice daily (morning and evening sessions)
-- Multiple trials tracked over 7-17 day periods
-
+-
 ## Workflow
 
 ### 1. Preprocessing
@@ -46,7 +45,7 @@ Raw images from side cameras are processed through multiple stages:
 
 ### 2. Object Detection & Segmentation
 Using Detectron2 with Labelbox annotations:
-- Train Faster R-CNN models to detect YEL (Young Early Leaf) and stem regions
+- Train Faster R-CNN models to detect YEL and stem regions
 - Generate bounding boxes across all trial images
 - Extract segmented plant components for analysis
 
@@ -191,27 +190,16 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 
 If you use this code or dataset in your research, please cite the associated paper:
 
-**Journal Paper**: [Add journal citation and DOI here]
+**Journal Paper**: Banerjee, S.; Reynolds, J.; Taggart, M.; Daniele, M.; Bozkurt, A.; Lobaton, E. Quantifying Visual Differences in Drought-Stressed Maize through Reflectance and Data-Driven Analysis. AI 2024, 5, 790-802. https://doi.org/10.3390/ai5020040
 
 **Dataset**: 
 ```bibtex
-@dataset{maize_drought_dataset,
-  author       = {[Authors]},
-  title        = {Maize Drought Stress Detection Dataset},
-  year         = {2024},
-  publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.10991581},
-  url          = {https://zenodo.org/records/10991581}
-}
+Sanjana Banerjee. (2024). Maize-Drought-Stress-Dataset-Raw [Data set]. Zenodo. https://doi.org/10.5281/zenodo.10991581
 ```
-
-## License
-
-[Add your license information here]
 
 ## Authors
 
-- Sanjana Srabanti
+- Sanjana Banerjee
 
 ## Acknowledgments
 
