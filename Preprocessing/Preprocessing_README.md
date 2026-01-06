@@ -182,14 +182,3 @@ Follow this sequence for complete preprocessing:
 4. Blackout.ipynb            → Remove interference
 ```
 
-## Dependencies
-
-os
-cv2
-numpy
-matplotlib
-shutil
-sklearn
-pandas
-glob
-
