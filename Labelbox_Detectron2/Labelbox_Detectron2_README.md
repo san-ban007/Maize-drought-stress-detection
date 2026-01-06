@@ -1,6 +1,6 @@
 # Labelbox_Detectron2
 
-Object detection and segmentation pipeline using Detectron2 with Labelbox annotation integration for identifying and extracting maize plant components (YEL - Young Early Leaf and stem regions).
+Object detection and segmentation pipeline using Detectron2 with Labelbox annotation integration for identifying and extracting maize plant components 
 
 ## Overview
 
@@ -10,7 +10,7 @@ This module implements a complete workflow for:
 3. Extracting and segmenting specific plant components based on predictions
 
 The system identifies two primary plant components:
-- **YEL (Young Early Leaf)**: Class 0 - The youngest, most stress-sensitive leaf
+- **YEL (Youngest Expanding Leaf)**: Class 0 - The youngest, most stress-sensitive leaf
 - **Stem**: Class 1 - The main plant stem structure
 
 ## Architecture
@@ -199,7 +199,7 @@ Plant1/
 
 ### Annotation Guidelines
 
-**YEL (Young Early Leaf)**:
+**YEL**:
 - Draw tight bounding box around youngest leaf
 - Include entire leaf blade but exclude stem
 - One box per image (most prominent YEL)
@@ -208,12 +208,6 @@ Plant1/
 - Draw box around visible main stem
 - Exclude leaves and branches
 - Include full vertical extent visible in frame
-
-### Quality Control
-- Review annotations for consistency
-- Ensure no overlap between YEL and Stem boxes
-- Verify boxes are tight (minimal background)
-- Check for missing annotations
 
 ## Model Training
 
@@ -412,23 +406,7 @@ upper_mask = im[:,:,0] < 0.9
 # For different lighting conditions
 lower_mask = im[:,:,0] > 0.4  # More inclusive
 upper_mask = im[:,:,0] < 0.95
-```
 
-### Multi-Class Extension
-To detect additional plant components:
-1. Update Labelbox ontology
-2. Increase `cfg.MODEL.ROI_HEADS.NUM_CLASSES`
-3. Add extraction logic in `Predictions_Extract.py`
-
-### Ensemble Models
-Train multiple models and combine predictions:
-```python
-predictions = []
-for model in models:
-    pred = model(image)
-    predictions.append(pred)
-final_pred = ensemble(predictions)  # e.g., majority vote
-```
 
 ## Integration with Pipeline
 
@@ -441,27 +419,5 @@ Preprocessing → Labelbox_Detectron2 → VisionTransformer
                                     ↘ Histograms
 ```
 
-## Citation
 
-If using Detectron2 in research:
-```bibtex
-@misc{wu2019detectron2,
-  author = {Yuxin Wu and Alexander Kirillov and Francisco Massa and
-            Wan-Yen Lo and Ross Girshick},
-  title = {Detectron2},
-  howpublished = {\url{https://github.com/facebookresearch/detectron2}},
-  year = {2019}
-}
-```
 
-## References
-
-- [Detectron2 Documentation](https://detectron2.readthedocs.io/)
-- [Labelbox Documentation](https://docs.labelbox.com/)
-- [Faster R-CNN Paper](https://arxiv.org/abs/1506.01497)
-
-## Related Documentation
-
-- Main README: `../README.md`
-- Preprocessing: `../Preprocessing/README.md`
-- Vision Transformer: `../VisionTransformer/README.md`
